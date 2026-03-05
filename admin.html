@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم | MASTER CHEAT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --red: #e63946; --gold: #ffd60a; --green: #10b981; --dark: #0a0a0a; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--dark); color: white; font-family: 'Cairo', sans-serif; min-height: 100vh; }
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background: radial-gradient(ellipse 50% 40% at 20% 20%, rgba(230,57,70,0.08) 0%, transparent 70%);
+            pointer-events: none; z-index: 0;
+        }
+        .content { position: relative; z-index: 1; }
+
+        /* Login */
+        .login-screen {
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            padding: 24px;
+        }
+        .login-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 28px;
+            padding: 36px 28px;
+            width: 100%; max-width: 360px;
+        }
+        .input-field {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            padding: 14px 18px;
+            color: white;
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .input-field:focus { border-color: var(--red); }
+
+        /* Tabs */
+        .tab-bar {
+            display: flex;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            overflow-x: auto;
+        }
+        .tab-btn {
+            padding: 16px 20px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #555;
+            cursor: pointer;
+            border: none;
+            background: none;
+            white-space: nowrap;
+            transition: all 0.2s;
+            font-family: 'Cairo', sans-serif;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-btn.active { color: white; border-bottom-color: var(--red); }
+
+        /* Cards */
+        .card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            padding: 20px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+        }
+        .stat-value { font-size: 26px; font-weight: 900; }
+        .stat-label { font-size: 10px; color: #555; margin-top: 2px; }
+
+        /* Order card */
+        .order-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .order-card.done { opacity: 0.4; }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 900;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Cairo', sans-serif;
+        }
+        .btn:hover { filter: brightness(1.2); transform: translateY(-1px); }
+        .btn-green { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
+        .btn-red { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+        .btn-gold { background: rgba(255,214,10,0.12); color: var(--gold); border: 1px solid rgba(255,214,10,0.2); }
+        .btn-blue { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2); }
+        .btn-full {
+            width: 100%; padding: 16px;
+            border-radius: 14px; font-size: 14px;
+            font-weight: 900; border: none;
+            cursor: pointer; transition: all 0.2s;
+            font-family: 'Cairo', sans-serif;
+            color: white;
+        }
+        .btn-full:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn-full:active { transform: translateY(1px); }
+
+        /* Toggle */
+        .toggle-wrap { display: flex; align-items: center; justify-content: space-between; }
+        .toggle {
+            width: 44px; height: 24px;
+            background: #333; border-radius: 12px;
+            position: relative; cursor: pointer; transition: background 0.2s;
+        }
+        .toggle.on { background: var(--green); }
+        .toggle::after {
+            content: '';
+            position: absolute; top: 3px; right: 3px;
+            width: 18px; height: 18px;
+            background: white; border-radius: 50%;
+            transition: right 0.2s;
+        }
+        .toggle.on::after { right: calc(100% - 21px); }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 24px; left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 22px; border-radius: 14px;
+            font-size: 13px; font-weight: 700; z-index: 9999;
+            transition: transform 0.3s ease; white-space: nowrap;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.success { border-color: rgba(16,185,129,0.4); color: var(--green); }
+        .toast.error { border-color: rgba(239,68,68,0.4); color: #ef4444; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 100; display: none;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: #111; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px; padding: 28px; width: 100%; max-width: 400px;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+
+        /* Offer form */
+        .form-label { font-size: 11px; color: #666; margin-bottom: 6px; display: block; }
+        .badge-new {
+            background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2);
+            color: var(--green); font-size: 9px; font-weight: 700;
+            padding: 2px 8px; border-radius: 20px;
+        }
+        .section-title { font-size: 11px; font-weight: 700; color: #444; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="login-screen">
+    <div class="login-card">
+        <div style="text-align:center; margin-bottom: 28px;">
+            <div style="font-size: 40px; margin-bottom: 10px;">🔐</div>
+            <div style="font-size: 20px; font-weight: 900;">لوحة التحكم</div>
+            <div style="font-size: 11px; color: #555; margin-top: 4px;">MASTER CHEAT ADMIN</div>
+        </div>
+        <div style="margin-bottom: 14px;">
+            <label class="form-label">كلمة السر</label>
+            <input type="password" id="admin-pass" class="input-field" placeholder="••••••••"
+                onkeydown="if(event.key==='Enter') login()">
+        </div>
+        <button class="btn-full" style="background: linear-gradient(135deg, var(--red), #c1121f);" onclick="login()">
+            دخول 🚀
+        </button>
+        <p style="font-size: 10px; color: #333; text-align: center; margin-top: 12px;">كلمة السر الافتراضية: admin123</p>
+    </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="content" id="admin-panel" style="display: none; padding-bottom: 40px;">
+
+    <!-- Header -->
+    <div style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:38px;height:38px;background:linear-gradient(135deg,var(--red),#c1121f);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 20px rgba(230,57,70,0.3);">⚙️</div>
+            <div>
+                <div style="font-size: 16px; font-weight: 900;">لوحة التحكم</div>
+                <div style="font-size: 10px; color: #444;">MASTER CHEAT</div>
+            </div>
+        </div>
+        <button onclick="logout()" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#777;padding:8px 14px;border-radius:10px;font-size:11px;cursor:pointer;font-family:'Cairo',sans-serif;">خروج</button>
+    </div>
+
+    <!-- Stats Bar -->
+    <div style="padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-orders" style="color:var(--gold);">0</div>
+                <div class="stat-label">طلبات معلقة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-offers" style="color:#60a5fa;">0</div>
+                <div class="stat-label">عروض نشطة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-done" style="color:var(--green);">0</div>
+                <div class="stat-label">تم شحنها</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('orders', this)">📦 الطلبات</button>
+        <button class="tab-btn" onclick="switchTab('offers', this)">🏷️ العروض</button>
+        <button class="tab-btn" onclick="switchTab('settings', this)">⚙️ الإعدادات</button>
+    </div>
+
+    <!-- ===== ORDERS TAB ===== -->
+    <div id="tab-orders" style="padding: 20px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px;">
+            <div class="section-title" style="margin-bottom:0;">طلبات الشحن</div>
+            <button class="btn btn-red" onclick="clearDoneOrders()" style="font-size:10px;">حذف المكتملة</button>
+        </div>
+        <div id="orders-list">
+            <div style="text-align:center;padding:40px;color:#444;font-size:13px;">تحميل الطلبات...</div>
+        </div>
+    </div>
+
+    <!-- ===== OFFERS TAB ===== -->
+    <div id="tab-offers" style="padding: 20px; display: none;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px;">
+            <div class="section-title" style="margin-bottom:0;">إدارة العروض</div>
+            <button class="btn btn-green" onclick="openAddOffer()">+ إضافة عرض</button>
+        </div>
+        <div id="offers-list">
+            <div style="text-align:center;padding:40px;color:#444;font-size:13px;">تحميل العروض...</div>
+        </div>
+    </div>
+
+    <!-- ===== SETTINGS TAB ===== -->
+    <div id="tab-settings" style="padding: 20px; display: none;">
+        <div class="section-title">رقم المحفظة</div>
+        <div class="card" style="margin-bottom: 16px;">
+            <label class="form-label">رقم الفودافون كاش / انستا باي</label>
+            <input type="tel" id="wallet-input" class="input-field" placeholder="01xxxxxxxxx" style="margin-bottom: 12px;" dir="ltr">
+            <button class="btn-full" style="background:linear-gradient(135deg,var(--green),#059669);" onclick="saveWallet()">💾 حفظ الرقم</button>
+        </div>
+
+        <div class="section-title">كلمة السر</div>
+        <div class="card" style="margin-bottom: 16px;">
+            <label class="form-label">كلمة السر الجديدة</label>
+            <input type="password" id="new-pass" class="input-field" placeholder="اكتب كلمة سر جديدة" style="margin-bottom: 12px;">
+            <button class="btn-full" style="background:linear-gradient(135deg,#6366f1,#4f46e5);" onclick="savePassword()">🔐 تغيير كلمة السر</button>
+        </div>
+
+        <div class="section-title">رابط الموقع</div>
+        <div class="card">
+            <p style="font-size: 12px; color: #666; margin-bottom: 10px;">شارك رابط صفحة الشراء مع العملاء</p>
+            <div style="background: rgba(0,0,0,0.3); border-radius: 10px; padding: 12px; text-align: center; margin-bottom: 10px;">
+                <div style="font-size: 12px; color: #60a5fa;" id="store-link">robux.html</div>
+            </div>
+            <button class="btn btn-blue" style="width:100%;" onclick="copyLink()">📋 نسخ الرابط</button>
+        </div>
+    </div>
+</div>
+
+<!-- Image Preview Modal -->
+<div class="modal-overlay" id="img-modal" onclick="closeImgModal()">
+    <img id="modal-img" src="" style="max-width:100%; max-height:85vh; border-radius:16px; border:2px solid rgba(255,255,255,0.1);">
+</div>
+
+<!-- Add/Edit Offer Modal -->
+<div class="modal-overlay" id="offer-modal">
+    <div class="modal">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 20px;">
+            <div style="font-size: 16px; font-weight: 900;" id="offer-modal-title">إضافة عرض جديد</div>
+            <button onclick="closeOfferModal()" style="background:rgba(255,255,255,0.05);border:none;color:#777;width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:16px;">×</button>
+        </div>
+
+        <input type="hidden" id="edit-offer-id">
+
+        <div style="margin-bottom: 12px;">
+            <label class="form-label">كمية الروبوكس</label>
+            <input type="number" id="offer-amount" class="input-field" placeholder="مثال: 400">
+        </div>
+        <div style="margin-bottom: 12px;">
+            <label class="form-label">السعر بالجنيه</label>
+            <input type="number" id="offer-price" class="input-field" placeholder="مثال: 200">
+        </div>
+        <div style="margin-bottom: 16px;">
+            <label class="form-label">ملاحظة (اختياري)</label>
+            <input type="text" id="offer-note" class="input-field" placeholder="مثال: عرض خاص محدود الوقت">
+        </div>
+        <div style="margin-bottom: 16px;">
+            <div class="toggle-wrap">
+                <span style="font-size: 13px; color: #aaa;">الأكثر طلباً 🔥</span>
+                <div class="toggle" id="popular-toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+        </div>
+
+        <div style="display:flex; gap: 8px;">
+            <button class="btn-full" style="background:linear-gradient(135deg,var(--green),#059669);" onclick="saveOffer()">💾 حفظ</button>
+            <button class="btn-full" style="background:rgba(255,255,255,0.05);color:#777;" onclick="closeOfferModal()">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+    import { getDatabase, ref, onValue, remove, set, push, update, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+    const app = initializeApp({
+        apiKey: "AIzaSyCd6mOpEJyiUSAAhmm2NbhT80MMY0UQJcc",
+        databaseURL: "https://project-fe025bb5-b1cc-4b8f-93e-default-rtdb.firebaseio.com"
+    });
+    const db = getDatabase(app);
+
+    let ADMIN_PASS = localStorage.getItem('mc_admin_pass') || 'admin123';
+    let doneCount = 0;
+
+    // ===== LOGIN =====
+    window.login = () => {
+        const p = document.getElementById('admin-pass').value;
+        const stored = localStorage.getItem('mc_admin_pass') || 'admin123';
+        if (p === stored) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'block';
+            loadAll();
+        } else {
+            showToast('كلمة السر غلط! ❌', 'error');
+            document.getElementById('admin-pass').value = '';
+        }
+    };
+    window.logout = () => {
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('admin-panel').style.display = 'none';
+    };
+
+    // ===== TABS =====
+    window.switchTab = (tab, btn) => {
+        document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + tab).style.display = 'block';
+        btn.classList.add('active');
+    };
+
+    function loadAll() {
+        loadOrders();
+        loadOffers();
+        loadSettings();
+    }
+
+    // ===== ORDERS =====
+    function loadOrders() {
+        onValue(ref(db, 'master_cheat/orders'), snap => {
+            const list = document.getElementById('orders-list');
+            let pending = 0; let done = 0;
+
+            if (!snap.exists()) {
+                list.innerHTML = `<div style="text-align:center;padding:40px;color:#444;font-size:13px;">لا توجد طلبات حالياً ✅</div>`;
+                document.getElementById('stat-orders').textContent = 0;
+                document.getElementById('stat-done').textContent = 0;
+                return;
+            }
+
+            list.innerHTML = '';
+            snap.forEach(order => {
+                const d = order.val();
+                const isDone = d.status === 'done';
+                if (isDone) done++; else pending++;
+
+                const div = document.createElement('div');
+                div.className = `order-card ${isDone ? 'done' : ''}`;
+                div.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                        <div>
+                            <div style="font-size:16px;font-weight:900;">${d.amount} Robux</div>
+                            <div style="font-size:11px;color:#60a5fa;margin-top:1px;">👤 ${d.user}</div>
+                        </div>
+                        <div style="text-align:left;">
+                            <div style="font-size:14px;font-weight:900;color:var(--gold);">${d.price} جنيه</div>
+                            <div style="font-size:9px;color:#444;margin-top:1px;">${d.date}</div>
+                        </div>
+                    </div>
+                    ${d.screenshot ? `<img src="${d.screenshot}" style="width:100%;border-radius:12px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.06);cursor:pointer;max-height:180px;object-fit:cover;" onclick="openImgModal('${order.key}')">` : ''}
+                    <div style="display:flex;gap:8px;">
+                        ${!isDone ? `<button class="btn btn-green" style="flex:1;" onclick="markDone('${order.key}')">✅ تم الشحن</button>` : `<div class="btn" style="flex:1;text-align:center;background:rgba(16,185,129,0.05);color:#10b98188;font-size:11px;border:1px solid rgba(16,185,129,0.1);">تم الشحن ✔</div>`}
+                        <button class="btn btn-red" style="flex:1;" onclick="deleteOrder('${order.key}')">🗑 حذف</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+
+            document.getElementById('stat-orders').textContent = pending;
+            document.getElementById('stat-done').textContent = done;
+            doneCount = done;
+        });
+    }
+
+    window.openImgModal = async (key) => {
+        const snap = await get(ref(db, `master_cheat/orders/${key}/screenshot`));
+        if (snap.exists()) {
+            document.getElementById('modal-img').src = snap.val();
+            document.getElementById('img-modal').classList.add('show');
+        }
+    };
+    window.closeImgModal = () => document.getElementById('img-modal').classList.remove('show');
+
+    window.markDone = async (id) => {
+        await update(ref(db, `master_cheat/orders/${id}`), { status: 'done' });
+        showToast('تم تأكيد الشحن ✅', 'success');
+    };
+    window.deleteOrder = (id) => {
+        if (confirm('هل تريد حذف هذا الطلب؟')) {
+            remove(ref(db, `master_cheat/orders/${id}`));
+            showToast('تم حذف الطلب 🗑', 'success');
+        }
+    };
+    window.clearDoneOrders = async () => {
+        if (!confirm('حذف كل الطلبات المكتملة؟')) return;
+        const snap = await get(ref(db, 'master_cheat/orders'));
+        if (!snap.exists()) return;
+        snap.forEach(order => {
+            if (order.val().status === 'done') remove(ref(db, `master_cheat/orders/${order.key}`));
+        });
+        showToast('تم حذف الطلبات المكتملة ✅', 'success');
+    };
+
+    // ===== OFFERS =====
+    function loadOffers() {
+        onValue(ref(db, 'master_cheat/offers'), snap => {
+            const list = document.getElementById('offers-list');
+            let count = 0;
+            if (!snap.exists()) {
+                list.innerHTML = `<div style="text-align:center;padding:40px;color:#444;font-size:13px;">لا توجد عروض، أضف عرضاً جديداً</div>`;
+                document.getElementById('stat-offers').textContent = 0;
+                return;
+            }
+            list.innerHTML = '';
+            snap.forEach(offer => {
+                const d = offer.val(); count++;
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.style.marginBottom = '12px';
+                div.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <div style="font-size:17px;font-weight:900;">💎 ${d.amount} Robux</div>
+                            <div style="font-size:12px;color:#888;margin-top:2px;">${d.price} جنيه ${d.popular ? '🔥 الأكثر طلباً' : ''}</div>
+                            ${d.note ? `<div style="font-size:10px;color:var(--green);margin-top:1px;">${d.note}</div>` : ''}
+                        </div>
+                        <div style="display:flex;gap:6px;">
+                            <button class="btn btn-gold" onclick="editOffer('${offer.key}', ${d.amount}, ${d.price}, '${d.note||''}', ${d.popular||false})">✏️ تعديل</button>
+                            <button class="btn btn-red" onclick="deleteOffer('${offer.key}')">🗑</button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            document.getElementById('stat-offers').textContent = count;
+        });
+    }
+
+    window.openAddOffer = () => {
+        document.getElementById('offer-modal-title').textContent = 'إضافة عرض جديد';
+        document.getElementById('edit-offer-id').value = '';
+        document.getElementById('offer-amount').value = '';
+        document.getElementById('offer-price').value = '';
+        document.getElementById('offer-note').value = '';
+        document.getElementById('popular-toggle').classList.remove('on');
+        document.getElementById('offer-modal').classList.add('show');
+    };
+
+    window.editOffer = (id, amount, price, note, popular) => {
+        document.getElementById('offer-modal-title').textContent = 'تعديل العرض';
+        document.getElementById('edit-offer-id').value = id;
+        document.getElementById('offer-amount').value = amount;
+        document.getElementById('offer-price').value = price;
+        document.getElementById('offer-note').value = note;
+        const t = document.getElementById('popular-toggle');
+        popular ? t.classList.add('on') : t.classList.remove('on');
+        document.getElementById('offer-modal').classList.add('show');
+    };
+
+    window.closeOfferModal = () => document.getElementById('offer-modal').classList.remove('show');
+
+    window.saveOffer = async () => {
+        const amount = parseInt(document.getElementById('offer-amount').value);
+        const price = parseInt(document.getElementById('offer-price').value);
+        const note = document.getElementById('offer-note').value.trim();
+        const popular = document.getElementById('popular-toggle').classList.contains('on');
+        const editId = document.getElementById('edit-offer-id').value;
+
+        if (!amount || !price) { showToast('ادخل الكمية والسعر! ⚠️', 'error'); return; }
+
+        const data = { amount, price, note, popular };
+        if (editId) {
+            await update(ref(db, `master_cheat/offers/${editId}`), data);
+            showToast('تم تعديل العرض ✅', 'success');
+        } else {
+            const r = push(ref(db, 'master_cheat/offers'));
+            await set(r, data);
+            showToast('تم إضافة العرض ✅', 'success');
+        }
+        closeOfferModal();
+    };
+
+    window.deleteOffer = (id) => {
+        if (confirm('حذف هذا العرض؟')) {
+            remove(ref(db, `master_cheat/offers/${id}`));
+            showToast('تم حذف العرض 🗑', 'success');
+        }
+    };
+
+    // ===== SETTINGS =====
+    function loadSettings() {
+        onValue(ref(db, 'master_cheat/settings/wallet'), snap => {
+            if (snap.exists()) document.getElementById('wallet-input').value = snap.val();
+        });
+    }
+
+    window.saveWallet = async () => {
+        const wallet = document.getElementById('wallet-input').value.trim();
+        if (!wallet) { showToast('ادخل رقم المحفظة! ⚠️', 'error'); return; }
+        await set(ref(db, 'master_cheat/settings/wallet'), wallet);
+        showToast('تم حفظ الرقم ✅', 'success');
+    };
+
+    window.savePassword = () => {
+        const np = document.getElementById('new-pass').value;
+        if (!np || np.length < 4) { showToast('كلمة السر قصيرة جداً! ⚠️', 'error'); return; }
+        localStorage.setItem('mc_admin_pass', np);
+        document.getElementById('new-pass').value = '';
+        showToast('تم تغيير كلمة السر ✅', 'success');
+    };
+
+    window.copyLink = () => {
+        navigator.clipboard.writeText(window.location.href.replace('admin.html', 'robux.html'))
+            .then(() => showToast('تم نسخ الرابط 📋', 'success'));
+    };
+
+    // ===== TOAST =====
+    window.showToast = (msg, type = 'success') => {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = `toast ${type} show`;
+        setTimeout(() => t.classList.remove('show'), 3000);
+    };
+</script>
+</body>
+</html>
